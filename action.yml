@@ -82,6 +82,34 @@ runs:
         ref: ${{ github.event.pull_request.head.ref }}
         clean: false
 
+    - name: Cache cargo crates
+      uses: actions/cache@v3
+      id: cache-cargo
+      env:
+        cache-name: cache-cargo-crates
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: ~/.cargo/bin/a11ywatch
+
+    - name: Install Rust, Cargo-Update, Protobuf Compiler
+      if: steps.cache-cargo.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        curl https://sh.rustup.rs -sSf | sh -s -- -y
+        sudo apt update && sudo apt upgrade -y
+        sudo apt install -y protobuf-compiler libprotobuf-dev
+
+    - name: A11yWatch CLI Install
+      uses: baptiste0928/cargo-install@v1
+      with:
+        crate: a11ywatch_cli
+        version: "0.10.2"
+
     - name: Build A11yWatch Service
       if: ${{ inputs.EXTERNAL == 'false' }}
       shell: bash
