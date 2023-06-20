@@ -243,22 +243,32 @@ runs:
         gh_api_url="$(a11ywatch --github-api-url)"
         website_issues=$(a11ywatch --results-issues)
 
+        echo "results_path: $results_path";
+        echo "gh_api_url: $gh_api_url";
+        echo "website_issues: $website_issues";
+
         # send pr results if issues exist
         if [ "$website_issues" -gt 0 ]; then
           # check for open pr
           pr_response=$(curl --location --request GET "$gh_api_url" \
               -H "Authorization: token $GH_TOKEN")
 
+          echo "IF - pr_response: $pr_response";
+
           if [ $(echo $pr_response | jq length) -eq 0 ]; then
             echo "No PR found to update"
-          else          
+          else
             pr_comment_url=$(echo $pr_response | jq -r ".[]._links.comments.href")
+
+            echo "IF - pr_comment_url: $pr_comment_url";
 
             # extract the results to a file
             body="$( a11ywatch --github-results-path extract --platform github ${{ inputs.LIST == 'true' && '-l' || ''}} )"
             
-            # get results of the file path 
+            # get results of the file path
             gh_file="@$(a11ywatch --github-results-path)"
+
+            echo "IF - gh_file: $gh_file";
 
             # post comment to github
             curl -X POST -d "$gh_file" "$pr_comment_url" \
