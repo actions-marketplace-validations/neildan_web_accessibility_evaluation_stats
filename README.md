@@ -8,6 +8,8 @@ Some of the primary features include pass/fail testing, code fixes, and detailed
 
 When running locally the action uses A11yWatch Lite.
 
+Publish comment in every event
+
 ### Usage
 
 ```yaml
