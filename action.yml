@@ -85,6 +85,9 @@ outputs:
   issues:
     description: "The amount of issues found on the page"
     value: ${{ steps.a11ywatch-results-generator.outputs.issues }}
+  result_json_issues:
+    description: "The issues descriptions found on the page"
+    value: ${{ steps.a11ywatch-results-generator.outputs.result_json_issues }}
 runs:
   using: composite
   steps:
@@ -172,7 +175,7 @@ runs:
 
     # TODO: Result
     - name: A11yWatch Scan [Local]
-      id: result_json
+      id: result-json
       if: ${{ inputs.EXTERNAL == 'false' && inputs.SITE_WIDE == 'false' }}
       shell: bash
       run: echo "result_json_issues=$(echo ${a11ywatch scan --url ${{ inputs.WEBSITE_URL }} --save ${{ inputs.FIX == 'true' && '--fix' || '' }}})" >> $GITHUB_OUTPUT
