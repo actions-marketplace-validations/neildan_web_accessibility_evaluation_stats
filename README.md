@@ -13,50 +13,43 @@ Publish comment in every event
 ### Usage
 
 ```yaml
-- uses: a11ywatch/github-action@v2
+- uses: neildan/web_accessibility_evaluation@v0.5
   with:
     WEBSITE_URL: ${{ secrets.WEBSITE_URL }}
     SUBDOMAINS: true
-    TLD: false
-    SITEMAP: true
-    FAIL_ERRORS_COUNT: 15
     LIST: true
-    FIX: false
-    UPGRADE: false
-    COMPUTER_VISION_SUBSCRIPTION_KEY: ${{ secrets.COMPUTER_VISION_SUBSCRIPTION_KEY }}
-    COMPUTER_VISION_ENDPOINT: ${{ secrets.COMPUTER_VISION_ENDPOINT }}
+    FIX: true
+    TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 ### Action inputs
 
 All inputs are **optional** except $WEBSITE_URL.
 
-| Name                               | Description                                                                                                                                                                                                              | Default        |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------- |
-| `WEBSITE_URL`                      | Website domain to scan (Start with http:// or https://).                                                                                                                                                                 |                |
-| `SITE_WIDE`                        | Site-wide scanning across all pages.                                                                                                                                                                                     | false          |
-| `FIX`                              | Attempt to apply recommendations to code and commit to github.                                                                                                                                                           | false          |
-| `SUBDOMAINS`                       | Include all subdomains (required SITE_WIDE=true).                                                                                                                                                                        | true           |
-| `SITEMAP`                          | Extend crawl with sitemap links (required SITE_WIDE=true).                                                                                                                                                               | true           |
-| `TLD`                              | Include all tld extensions (required SITE_WIDE=true).                                                                                                                                                                    | true           |
-| `LIST`                             | Report the results to github as a pass or fail list or detailed report.                                                                                                                                                  | false          |
-| `FAIL_TOTAL_COUNT`                 | Determine whether to fail the CI if total issues warnings and errors exceed the counter. Takes precedence over the other FAIL inputs.                                                                                    | 0              |
-| `FAIL_ERRORS_COUNT`                | Determine whether to fail the CI if total issues with errors exceed the counter.                                                                                                                                         | 0              |
-| `FAIL_WARNINGS_COUNT`              | Determine whether to fail the CI if total issues with warnings exceed the counter.                                                                                                                                       | 0              |
-| `EXTERNAL`                         | Use the A11yWatch remote API for fast results. If this is set `A11YWATCH_TOKEN` is needed.                                                                                                                               |                |
-| `COMPUTER_VISION_SUBSCRIPTION_KEY` | [Computer Vision](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/#overview) API key for image recognition on alts.                                                                        |                |
-| `COMPUTER_VISION_ENDPOINT`         | Computer Vision url endpoint.                                                                                                                                                                                            | false          |
-| `DISABLE_PR_STATS`                 | Prevent messaging to the pr results of test.                                                                                                                                                                             | false          |
-| `TOKEN`                            | `GITHUB_TOKEN` (permissions `contents: write` and `pull-requests: write`) or a `repo` scoped [Personal Access Token (PAT)](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token). | `GITHUB_TOKEN` |
-| `A11YWATCH_TOKEN`                  | The A11yWatch API token to use to identify a user.                                                                                                                                                                       |                |
-| `SLIM`                             | Use the gRPC client to gather reports - only displays stats, useful for large websites (no code generation, no outputs, just pure stats)                                                                                 |                |
-| `UPGRADE`                          | Upgrade the docker images before testing to latest.                                                                                                                                                                      |                |
+| Name                  | Description                                                                                                                                                                                                              | Default        |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------- | --- | ----- |
+| `WEBSITE_URL`         | Website domain to scan (Start with http:// or https://).                                                                                                                                                                 |                |
+| `SITE_WIDE`           | Site-wide scanning across all pages.                                                                                                                                                                                     | false          |
+| `FIX`                 | Attempt to apply recommendations to code and commit to github.                                                                                                                                                           | false          |
+| `SUBDOMAINS`          | Include all subdomains (required SITE_WIDE=true).                                                                                                                                                                        | true           |
+| `SITEMAP`             | Extend crawl with sitemap links (required SITE_WIDE=true).                                                                                                                                                               | true           |
+| `TLD`                 | Include all tld extensions (required SITE_WIDE=true).                                                                                                                                                                    | true           |
+| `LIST`                | Report the results to github as a pass or fail list or detailed report.                                                                                                                                                  | false          |
+| `FAIL_TOTAL_COUNT`    | Determine whether to fail the CI if total issues warnings and errors exceed the counter. Takes precedence over the other FAIL inputs.                                                                                    | 0              |
+| `FAIL_ERRORS_COUNT`   | Determine whether to fail the CI if total issues with errors exceed the counter.                                                                                                                                         | 0              |
+| `FAIL_WARNINGS_COUNT` | Determine whether to fail the CI if total issues with warnings exceed the counter.                                                                                                                                       | 0              |
+| `EXTERNAL`            | Use the A11yWatch remote API for fast results. If this is set `A11YWATCH_TOKEN` is needed.                                                                                                                               |                |     | false |
+| `DISABLE_PR_STATS`    | Prevent messaging to the pr results of test.                                                                                                                                                                             | false          |
+| `TOKEN`               | `GITHUB_TOKEN` (permissions `contents: write` and `pull-requests: write`) or a `repo` scoped [Personal Access Token (PAT)](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token). | `GITHUB_TOKEN` |
+| `A11YWATCH_TOKEN`     | The A11yWatch API token to use to identify a user.                                                                                                                                                                       |                |
+| `UPGRADE`             | Upgrade the docker images before testing to latest.                                                                                                                                                                      |                |
 
 ### Action Outputs
 
-| Name     | Description                | Default |
-| -------- | -------------------------- | ------- |
-| `issues` | The amount of issues found |         |
+| Name                 | Description                | Default |
+| -------------------- | -------------------------- | ------- |
+| `issues`             | The amount of issues found |         |
+| `result_json_issues` | The issues descriptions    |         |
 
 ## Benches
 
