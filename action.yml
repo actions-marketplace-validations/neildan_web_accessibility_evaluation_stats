@@ -8,7 +8,7 @@ author: A11yWatch
 branding:
   icon: "shield"
   color: "gray-dark"
-description: Powerful web accessibility testing.
+description: Powerful web accessibility testing, this tool only returns the evaluation, no actions involved
 inputs:
   WEBSITE_URL:
     description: Website domain to scan
@@ -45,26 +45,10 @@ inputs:
     description: Use to fail the CI if the amount of issues of type warnings is greater than the count.
     required: false
     default: 0
-  DISABLE_PR_STATS:
-    description: Disable the bot from posting on your PR.
-    required: false
-    default: false
   LIST:
     description: Report the output to github as a pass or fail list.
     required: false
     default: false
-  A11YWATCH_TOKEN:
-    description: The A11yWatch token to authenticate to the API.
-    required: false
-    default: ""
-  COMPUTER_VISION_ENDPOINT:
-    description: The Computer Vision endpoint to use for advanced AI.
-    required: false
-    default: ""
-  COMPUTER_VISION_SUBSCRIPTION_KEY:
-    description: The Computer Vision subscription key to use for advanced AI.
-    required: false
-    default: ""
   SLIM:
     description: Use a gRPC client to gather issues.
     required: false
@@ -74,12 +58,24 @@ inputs:
     required: false
     default: false
 outputs:
-  issues:
-    description: "The amount of issues found on the page"
-    value: ${{ steps.a11ywatch-results-generator.outputs.issues }}
-  result_json_issues:
+  amount_issues_total:
+    description: "The amount of errors and warnings found on the page"
+    value: ${{ steps.a11ywatch-results-generator.outputs.amount_issues_total }}
+  amount_errors:
+    description: "The amount of errors found on the page"
+    value: ${{ steps.a11ywatch-results-generator.outputs.amount_errors }}
+  amount_warnings:
+    description: "The amount of warnings found on the page"
+    value: ${{ steps.a11ywatch-results-generator.outputs.amount_warnings }}
+  evaluation_status:
+    description: "The status of end evaluation, show 'Success' or 'Fail'"
+    value: ${{ steps.a11ywatch-results-generator.outputs.evaluation_status }}
+  full_evaluation:
+    description: "A full message with evaluation description"
+    value: ${{ steps.a11ywatch-results-generator.outputs.full_evaluation }}
+  json_full_result:
     description: "The issues descriptions found on the page"
-    value: ${{ steps.get-result-json-issues.outputs.result_json_issues }}
+    value: ${{ steps.get-result-json-issues.outputs.json_full_result }}
 runs:
   using: composite
   steps:
@@ -140,21 +136,6 @@ runs:
         crate: a11ywatch_cli
         version: "0.10.2"
 
-    - name: Configure CLI creds
-      if: ${{ inputs.A11YWATCH_TOKEN }}
-      shell: bash
-      run: a11ywatch --set-token ${{ inputs.A11YWATCH_TOKEN }}
-
-    - name: Configure Computer Vision API KEY
-      if: ${{ inputs.COMPUTER_VISION_SUBSCRIPTION_KEY }}
-      shell: bash
-      run: a11ywatch --set-cv-token ${{ inputs.COMPUTER_VISION_SUBSCRIPTION_KEY }}
-
-    - name: Configure Computer Vision URL
-      if: ${{ inputs.COMPUTER_VISION_ENDPOINT }}
-      shell: bash
-      run: a11ywatch --set-cv-url ${{ inputs.COMPUTER_VISION_ENDPOINT }}
-
     - name: Build A11yWatch Service
       shell: bash
       run: a11ywatch build --standalone --local ${{ inputs.UPGRADE == 'true' && '--upgrade' || '' }}
@@ -163,16 +144,15 @@ runs:
       shell: bash
       run: a11ywatch start --standalone --local
 
-    - name: A11yWatch Scan [Local]
+    - name: A11yWatch Scan
       id: get-result-json-issues
       if: ${{ inputs.SITE_WIDE == 'false' }}
       shell: bash
       run: |
         result_json="$(a11ywatch scan --url ${{ inputs.WEBSITE_URL }} --save ${{ inputs.FIX == 'true' && '--fix' || '' }})"
-        echo "CONSOLE LOG : ${result_json}"
-        echo "result_json_issues=$(echo ${result_json})" >> $GITHUB_OUTPUT
+        echo "json_full_result=$(echo ${result_json})" >> $GITHUB_OUTPUT
 
-    - name: A11yWatch Crawl [Local]
+    - name: A11yWatch Crawl
       if: ${{ inputs.SITE_WIDE == 'true' }}
       shell: bash
       run: a11ywatch crawl --url ${{ inputs.WEBSITE_URL }} ${{ inputs.SUBDOMAINS == 'true' && '--subdomains' || '' }} ${{ inputs.TLD == 'true' && '--tld' || ''}} ${{ inputs.SITEMAP == 'true' && '--sitemap' || '' }} --save ${{ inputs.FIX == 'true' && '--fix' || '' }}
@@ -187,16 +167,8 @@ runs:
         website_issues_total=$(a11ywatch --results-issues)
         website_issues_errors=$(a11ywatch --results-issues-errors)
         website_issues_warnings=$(a11ywatch --results-issues-warnings)
-
-        echo "SCAN RESULT:"
-        echo "website_issues_total $website_issues_total"
-        echo "website_issues_errors $website_issues_errors"
-        echo "website_issues_warnings $website_issues_warnings"
-
-        body="$( a11ywatch --github-results-path extract --platform github ${{ inputs.LIST == 'true' && '-l' || ''}} )"
-
-        gh_file="@$(a11ywatch --github-results-path)"
-        echo "gh_file: $gh_file"
+        website_short_evaluation="success"
+        website_long_evaluation=""
 
         total_limit=${{ inputs.FAIL_TOTAL_COUNT }}
         errors_limit=${{ inputs.FAIL_ERRORS_COUNT }}
@@ -208,26 +180,30 @@ runs:
 
         if [ "$total_count" -gt 0 ]; then
           if [ $website_issues_total -gt "$total_count" ]; then
-              echo "Failed accessibility test. $website_issues_total total errors and warnings exceeded limit!"
-              # exit 1
+              website_short_evaluation="fail"
+              website_long_evaluation="Failed accessibility test. $website_issues_total total errors and warnings exceeded limit!"
           fi
         fi
 
         if [ "$errors_count" -gt 0 ]; then
           if [ $website_issues_errors -gt "$errors_count" ]; then
-              echo "Failed accessibility test. $website_issues_errors errors exceeded the limit!"
-              # exit 1
+              website_short_evaluation="fail"
+              website_long_evaluation="Failed accessibility test. $website_issues_errors errors exceeded the limit!"
           fi
         fi
 
         if [ "$warnings_count" -gt 0 ]; then
           if [ $website_issues_warnings -gt "$warnings_count" ]; then
-              echo "Failed accessibility test. $website_issues_warnings warnings exceeded limit!"
-              # exit 1
+              website_short_evaluation="fail"
+              website_long_evaluation="Failed accessibility test. $website_issues_warnings warnings exceeded limit!"
           fi
         fi
 
-        echo "issues=$(echo ${website_issues_total})" >> $GITHUB_OUTPUT
+        echo "evaluation_status=$(echo ${website_short_evaluation})" >> $GITHUB_OUTPUT
+        echo "full_evaluation=$(echo ${website_long_evaluation})" >> $GITHUB_OUTPUT
+        echo "amount_issues_total=$(echo ${website_issues_total})" >> $GITHUB_OUTPUT
+        echo "amount_errors=$(echo ${website_issues_errors})" >> $GITHUB_OUTPUT
+        echo "amount_warnings=$(echo ${website_issues_warnings})" >> $GITHUB_OUTPUT
 
     - uses: EndBug/add-and-commit@v9
       if: ${{ inputs.FIX == 'true' }}
