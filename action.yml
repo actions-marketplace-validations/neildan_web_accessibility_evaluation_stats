@@ -79,13 +79,6 @@ outputs:
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@v3.0.2
-      if: ${{ inputs.FIX == 'true' }}
-      with:
-        repository: ${{ github.event.pull_request.head.repo.full_name }}
-        ref: ${{ github.event.pull_request.head.ref }}
-        clean: false
-
     - name: Get yarn cache directory path
       id: yarn-cache-dir-path
       run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
@@ -204,12 +197,6 @@ runs:
         echo "amount_issues_total=$(echo ${website_issues_total})" >> $GITHUB_OUTPUT
         echo "amount_errors=$(echo ${website_issues_errors})" >> $GITHUB_OUTPUT
         echo "amount_warnings=$(echo ${website_issues_warnings})" >> $GITHUB_OUTPUT
-
-    - uses: EndBug/add-and-commit@v9
-      if: ${{ inputs.FIX == 'true' }}
-      with:
-        message: "fix(accessibility): add recommendations from scan"
-        committer_name: GitHub Actions
 
     - name: Stop A11yWatch Service
       shell: bash
