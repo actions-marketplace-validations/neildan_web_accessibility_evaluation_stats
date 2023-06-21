@@ -60,22 +60,22 @@ inputs:
 outputs:
   AMOUNT_ISSUES_TOTAL:
     description: "The amount of errors and warnings found on the page"
-    value: ${{ steps.a11ywatch-results-generator.outputs.AMOUNT_ISSUES_TOTAL }}
+    value: ${{ steps.a11ywatch-results-generator.outputs.AMOUNT_ISSUES_TOTAL || 0 }}
   AMOUNT_ERRORS:
     description: "The amount of errors found on the page"
-    value: ${{ steps.a11ywatch-results-generator.outputs.AMOUNT_ERRORS }}
+    value: ${{ steps.a11ywatch-results-generator.outputs.AMOUNT_ERRORS || 0 }}
   AMOUNT_WARNINGS:
     description: "The amount of warnings found on the page"
-    value: ${{ steps.a11ywatch-results-generator.outputs.AMOUNT_WARNINGS }}
+    value: ${{ steps.a11ywatch-results-generator.outputs.AMOUNT_WARNINGS || 0 }}
   EVALUATION_STATUS:
-    description: "The status of end evaluation, show 'Success' or 'Fail'"
-    value: ${{ steps.a11ywatch-results-generator.outputs.EVALUATION_STATUS }}
+    description: "The status of end evaluation, show 'success' or 'fail'"
+    value: ${{ steps.a11ywatch-results-generator.outputs.EVALUATION_STATUS || 'fail' }}
   FULL_EVALUATION:
     description: "A full message with evaluation description"
-    value: ${{ steps.a11ywatch-results-generator.outputs.FULL_EVALUATION }}
+    value: ${{ steps.a11ywatch-results-generator.outputs.FULL_EVALUATION || 'Error to generate result' }}
   JSON_FULL_RESULT:
     description: "The issues descriptions found on the page"
-    value: ${{ steps.get-result-json-issues.outputs.JSON_FULL_RESULT }}
+    value: ${{ steps.get-result-json-issues.outputs.JSON_FULL_RESULT || 'Error to generate result' }}
 runs:
   using: composite
   steps:
