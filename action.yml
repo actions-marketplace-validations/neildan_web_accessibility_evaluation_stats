@@ -126,7 +126,7 @@ runs:
       shell: bash
       run: |
         result_json="$(echo a11ywatch scan --url ${{ inputs.WEBSITE_URL }} --save ${{ inputs.FIX == 'true' && '--fix' || '' }})"
-        echo result_json
+        echo "CONSOLE LOG : ${result_json}"
         echo "result_json_issues=$(echo ${result_json})" >> $GITHUB_OUTPUT
 
     - name: A11yWatch Scan [External]
