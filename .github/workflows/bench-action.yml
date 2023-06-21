@@ -14,10 +14,7 @@ jobs:
         uses: ./
         with:
           WEBSITE_URL: https://a11ywatch.com
-          FAIL_TOTAL_COUNT: 0
-          EXTERNAL: false
-          SITE_WIDE: true
-          SUBDOMAINS: false
-          TLD: false
+          SUBDOMAINS: true
           LIST: true
-          UPGRADE: false
+          SITEMAP: true
+          FAIL_TOTAL_COUNT: 1
