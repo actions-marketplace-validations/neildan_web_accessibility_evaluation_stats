@@ -1,6 +1,6 @@
 # github-action
 
-[![Tests](https://github.com/a11ywatch/github-actions/actions/workflows/action.yml/badge.svg)](https://github.com/a11ywatch/github-actions/actions/workflows/action.yml)
+[![Tests](https://github.com/neildan/web_accessibility_evaluation_stats/actions/workflows/action.yml/badge.svg)](https://github.com/neildan/web_accessibility_evaluation_stats/actions/workflows/action.yml)
 
 A feature rich GitHub action that runs actionable accessibility reports on your website that can handle large workloads.
 
@@ -8,48 +8,49 @@ Some of the primary features include pass/fail testing, code fixes, and detailed
 
 When running locally the action uses A11yWatch Lite.
 
-Publish comment in every event
+Get complete information about web accessibility testing, this tool only returns the evaluation, no actions involved
 
 ### Usage
 
 ```yaml
-- uses: neildan/web_accessibility_evaluation@v0.5
+- uses: neildan/web_accessibility_evaluation_stats@v1
   with:
     WEBSITE_URL: ${{ secrets.WEBSITE_URL }}
     SUBDOMAINS: true
     LIST: true
-    FIX: true
-    TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    SITEMAP: true
+    FAIL_TOTAL_COUNT: 1
 ```
 
 ### Action inputs
 
 All inputs are **optional** except $WEBSITE_URL.
 
-| Name                  | Description                                                                                                                                                                                                              | Default        |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------- | --- | ----- |
-| `WEBSITE_URL`         | Website domain to scan (Start with http:// or https://).                                                                                                                                                                 |                |
-| `SITE_WIDE`           | Site-wide scanning across all pages.                                                                                                                                                                                     | false          |
-| `FIX`                 | Attempt to apply recommendations to code and commit to github.                                                                                                                                                           | false          |
-| `SUBDOMAINS`          | Include all subdomains (required SITE_WIDE=true).                                                                                                                                                                        | true           |
-| `SITEMAP`             | Extend crawl with sitemap links (required SITE_WIDE=true).                                                                                                                                                               | true           |
-| `TLD`                 | Include all tld extensions (required SITE_WIDE=true).                                                                                                                                                                    | true           |
-| `LIST`                | Report the results to github as a pass or fail list or detailed report.                                                                                                                                                  | false          |
-| `FAIL_TOTAL_COUNT`    | Determine whether to fail the CI if total issues warnings and errors exceed the counter. Takes precedence over the other FAIL inputs.                                                                                    | 0              |
-| `FAIL_ERRORS_COUNT`   | Determine whether to fail the CI if total issues with errors exceed the counter.                                                                                                                                         | 0              |
-| `FAIL_WARNINGS_COUNT` | Determine whether to fail the CI if total issues with warnings exceed the counter.                                                                                                                                       | 0              |
-| `EXTERNAL`            | Use the A11yWatch remote API for fast results. If this is set `A11YWATCH_TOKEN` is needed.                                                                                                                               |                |     | false |
-| `DISABLE_PR_STATS`    | Prevent messaging to the pr results of test.                                                                                                                                                                             | false          |
-| `TOKEN`               | `GITHUB_TOKEN` (permissions `contents: write` and `pull-requests: write`) or a `repo` scoped [Personal Access Token (PAT)](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token). | `GITHUB_TOKEN` |
-| `A11YWATCH_TOKEN`     | The A11yWatch API token to use to identify a user.                                                                                                                                                                       |                |
-| `UPGRADE`             | Upgrade the docker images before testing to latest.                                                                                                                                                                      |                |
+| Name                  | Description                                                                                                                              | Default |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `WEBSITE_URL`         | Website domain to scan (Start with http:// or https://).                                                                                 |         |
+| `SITE_WIDE`           | Site-wide scanning across all pages.                                                                                                     | false   |
+| `FIX`                 | Attempt to apply recommendations to code and commit to github.                                                                           | false   |
+| `SUBDOMAINS`          | Include all subdomains (required SITE_WIDE=true).                                                                                        | false   |
+| `SITEMAP`             | Extend crawl with sitemap links (required SITE_WIDE=true).                                                                               | false   |
+| `TLD`                 | Include all tld extensions (required SITE_WIDE=true).                                                                                    | false   |
+| `LIST`                | Report the results to github as a pass or fail list or detailed report.                                                                  | false   |
+| `FAIL_TOTAL_COUNT`    | Determine whether to fail the CI if total issues warnings and errors exceed the counter. Takes precedence over the other FAIL inputs.    | 0       |
+| `FAIL_ERRORS_COUNT`   | Determine whether to fail the CI if total issues with errors exceed the counter.                                                         | 0       |
+| `FAIL_WARNINGS_COUNT` | Determine whether to fail the CI if total issues with warnings exceed the counter.                                                       | 0       |
+| `SLIM`                | Use the gRPC client to gather reports - only displays stats, useful for large websites (no code generation, no outputs, just pure stats) | true    |
+| `UPGRADE`             | Upgrade the docker images before testing to latest.                                                                                      | false   |
 
 ### Action Outputs
 
-| Name                 | Description                | Default |
-| -------------------- | -------------------------- | ------- |
-| `issues`             | The amount of issues found |         |
-| `result_json_issues` | The issues descriptions    |         |
+| Name                  | Description                                            | Default |
+| --------------------- | ------------------------------------------------------ | ------- |
+| `AMOUNT_ISSUES_TOTAL` | The amount of errors and warnings found on the page    | 0       |
+| `AMOUNT_ERRORS`       | The amount of errors found on the page                 | 0       |
+| `AMOUNT_WARNINGS`     | The amount of warnings found on the page               | 0       |
+| `EVALUATION_STATUS`   | The status of end evaluation, show 'success' or 'fail' | 'fail'  |
+| `JSON_FULL_RESULT`    | A full message with evaluation description             | ''      |
+| `FULL_EVALUATION`     | The issues descriptions found on the page              | ''      |
 
 ## Benches
 

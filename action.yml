@@ -1,4 +1,4 @@
-name: Web Accessibility Evaluation
+name: Web Accessibility Evaluation Stats
 on:
   push:
     branches: [$default-branch]
@@ -7,8 +7,8 @@ on:
 author: A11yWatch
 branding:
   icon: "shield"
-  color: "gray-dark"
-description: Powerful web accessibility testing, this tool only returns the evaluation, no actions involved
+  color: "blue-dark"
+description: Powerful web accessibility testing
 inputs:
   WEBSITE_URL:
     description: Website domain to scan
@@ -72,10 +72,10 @@ outputs:
     value: ${{ steps.a11ywatch-results-generator.outputs.EVALUATION_STATUS || 'fail' }}
   FULL_EVALUATION:
     description: "A full message with evaluation description"
-    value: ${{ steps.a11ywatch-results-generator.outputs.FULL_EVALUATION || 'Error to generate result' }}
+    value: ${{ steps.a11ywatch-results-generator.outputs.FULL_EVALUATION || '' }}
   JSON_FULL_RESULT:
     description: "The issues descriptions found on the page"
-    value: ${{ steps.get-result-json-issues.outputs.JSON_FULL_RESULT || 'Error to generate result' }}
+    value: ${{ steps.get-result-json-issues.outputs.JSON_FULL_RESULT || '' }}
 runs:
   using: composite
   steps:
