@@ -60,22 +60,22 @@ inputs:
 outputs:
   AMOUNT_ISSUES_TOTAL:
     description: "The amount of errors and warnings found on the page"
-    value: ${{ steps.a11ywatch-results-generator.outputs.amount_issues_total }}
+    value: ${{ steps.a11ywatch-results-generator.outputs.AMOUNT_ISSUES_TOTAL }}
   AMOUNT_ERRORS:
     description: "The amount of errors found on the page"
-    value: ${{ steps.a11ywatch-results-generator.outputs.amount_errors }}
+    value: ${{ steps.a11ywatch-results-generator.outputs.AMOUNT_ERRORS }}
   AMOUNT_WARNINGS:
     description: "The amount of warnings found on the page"
-    value: ${{ steps.a11ywatch-results-generator.outputs.amount_warnings }}
+    value: ${{ steps.a11ywatch-results-generator.outputs.AMOUNT_WARNINGS }}
   EVALUATION_STATUS:
     description: "The status of end evaluation, show 'Success' or 'Fail'"
-    value: ${{ steps.a11ywatch-results-generator.outputs.evaluation_status }}
+    value: ${{ steps.a11ywatch-results-generator.outputs.EVALUATION_STATUS }}
   FULL_EVALUATION:
     description: "A full message with evaluation description"
-    value: ${{ steps.a11ywatch-results-generator.outputs.full_evaluation }}
+    value: ${{ steps.a11ywatch-results-generator.outputs.FULL_EVALUATION }}
   JSON_FULL_RESULT:
     description: "The issues descriptions found on the page"
-    value: ${{ steps.get-result-json-issues.outputs.json_full_result }}
+    value: ${{ steps.get-result-json-issues.outputs.JSON_FULL_RESULT }}
 runs:
   using: composite
   steps:
@@ -143,7 +143,7 @@ runs:
       shell: bash
       run: |
         result_json="$(a11ywatch scan --url ${{ inputs.WEBSITE_URL }} --save ${{ inputs.FIX == 'true' && '--fix' || '' }})"
-        echo "json_full_result=$(echo ${result_json})" >> $GITHUB_OUTPUT
+        echo "JSON_FULL_RESULT=$(echo ${result_json})" >> $GITHUB_OUTPUT
 
     - name: A11yWatch Crawl
       if: ${{ inputs.SITE_WIDE == 'true' }}
@@ -192,11 +192,11 @@ runs:
           fi
         fi
 
-        echo "evaluation_status=$(echo ${website_short_evaluation})" >> $GITHUB_OUTPUT
-        echo "full_evaluation=$(echo ${website_long_evaluation})" >> $GITHUB_OUTPUT
-        echo "amount_issues_total=$(echo ${website_issues_total})" >> $GITHUB_OUTPUT
-        echo "amount_errors=$(echo ${website_issues_errors})" >> $GITHUB_OUTPUT
-        echo "amount_warnings=$(echo ${website_issues_warnings})" >> $GITHUB_OUTPUT
+        echo "EVALUATION_STATUS=$(echo ${website_short_evaluation})" >> $GITHUB_OUTPUT
+        echo "FULL_EVALUATION=$(echo ${website_long_evaluation})" >> $GITHUB_OUTPUT
+        echo "AMOUNT_ISSUES_TOTAL=$(echo ${website_issues_total})" >> $GITHUB_OUTPUT
+        echo "AMOUNT_ERRORS=$(echo ${website_issues_errors})" >> $GITHUB_OUTPUT
+        echo "AMOUNT_WARNINGS=$(echo ${website_issues_warnings})" >> $GITHUB_OUTPUT
 
     - name: Stop A11yWatch Service
       shell: bash
