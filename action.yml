@@ -7,7 +7,7 @@ on:
 author: A11yWatch
 branding:
   icon: "shield"
-  color: "blue-dark"
+  color: "green"
 description: Powerful web accessibility testing
 inputs:
   WEBSITE_URL:
