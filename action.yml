@@ -17,10 +17,6 @@ inputs:
     description: Attempt to apply recommendations to code.
     required: false
     default: false
-  EXTERNAL:
-    description: Use the A11yWatch external API.
-    required: false
-    default: false
   SITE_WIDE:
     description: Perform a site-wide scan.
     required: false
@@ -53,10 +49,6 @@ inputs:
     description: Disable the bot from posting on your PR.
     required: false
     default: false
-  TOKEN:
-    description: The github token to use for posting comments.
-    required: false
-    default: ""
   LIST:
     description: Report the output to github as a pass or fail list.
     required: false
@@ -164,40 +156,26 @@ runs:
       run: a11ywatch --set-cv-url ${{ inputs.COMPUTER_VISION_ENDPOINT }}
 
     - name: Build A11yWatch Service
-      if: ${{ inputs.EXTERNAL == 'false' }}
       shell: bash
       run: a11ywatch build --standalone --local ${{ inputs.UPGRADE == 'true' && '--upgrade' || '' }}
 
     - name: Start A11yWatch Service
-      if: ${{ inputs.EXTERNAL == 'false' }}
       shell: bash
       run: a11ywatch start --standalone --local
 
     - name: A11yWatch Scan [Local]
       id: get-result-json-issues
-      if: ${{ inputs.EXTERNAL == 'false' && inputs.SITE_WIDE == 'false' }}
+      if: ${{ inputs.SITE_WIDE == 'false' }}
       shell: bash
       run: |
         result_json="$(a11ywatch scan --url ${{ inputs.WEBSITE_URL }} --save ${{ inputs.FIX == 'true' && '--fix' || '' }})"
         echo "CONSOLE LOG : ${result_json}"
         echo "result_json_issues=$(echo ${result_json})" >> $GITHUB_OUTPUT
 
-    - name: A11yWatch Scan [External]
-      if: ${{ inputs.EXTERNAL == 'true' && inputs.SITE_WIDE == 'false' }}
-      shell: bash
-      run: |
-        a11ywatch scan --url ${{ inputs.WEBSITE_URL }} --external --save ${{ inputs.FIX == 'true' && '--fix' || '' }}
-        echo "result_json_issues=''" >> $GITHUB_OUTPUT
-
     - name: A11yWatch Crawl [Local]
-      if: ${{ inputs.EXTERNAL == 'false' && inputs.SITE_WIDE == 'true' }}
+      if: ${{ inputs.SITE_WIDE == 'true' }}
       shell: bash
       run: a11ywatch crawl --url ${{ inputs.WEBSITE_URL }} ${{ inputs.SUBDOMAINS == 'true' && '--subdomains' || '' }} ${{ inputs.TLD == 'true' && '--tld' || ''}} ${{ inputs.SITEMAP == 'true' && '--sitemap' || '' }} --save ${{ inputs.FIX == 'true' && '--fix' || '' }}
-
-    - name: A11yWatch Crawl [External]
-      if: ${{ inputs.EXTERNAL == 'true' && inputs.SITE_WIDE == 'true' }}
-      shell: bash
-      run: a11ywatch crawl --url ${{ inputs.WEBSITE_URL }} ${{ inputs.SUBDOMAINS == 'true' && '--subdomains' || '' }} ${{ inputs.TLD == 'true' && '--tld' || ''}} ${{ inputs.SITEMAP == 'true' && '--sitemap' || '' }} --external --save ${{ inputs.FIX == 'true' && '--fix' || '' }}
 
     - name: Scan Results Check
       id: a11ywatch-results-generator
@@ -258,6 +236,5 @@ runs:
         committer_name: GitHub Actions
 
     - name: Stop A11yWatch Service
-      if: ${{ !inputs.EXTERNAL }}
       shell: bash
       run: a11ywatch stop
