@@ -87,7 +87,7 @@ outputs:
     value: ${{ steps.a11ywatch-results-generator.outputs.issues }}
   result_json_issues:
     description: "The issues descriptions found on the page"
-    value: ${{ steps.a11ywatch-results-generator.outputs.result_json_issues }}
+    value: ${{ steps.get-result-json-issues.outputs.result_json_issues }}
 runs:
   using: composite
   steps:
@@ -174,14 +174,20 @@ runs:
       run: a11ywatch start --standalone --local
 
     - name: A11yWatch Scan [Local]
+      id: get-result-json-issues
       if: ${{ inputs.EXTERNAL == 'false' && inputs.SITE_WIDE == 'false' }}
       shell: bash
-      run: a11ywatch scan --url ${{ inputs.WEBSITE_URL }} --save ${{ inputs.FIX == 'true' && '--fix' || '' }}
+      run: |
+        result_json="$(a11ywatch scan --url ${{ inputs.WEBSITE_URL }} --save ${{ inputs.FIX == 'true' && '--fix' || '' }})"
+        echo "CONSOLE LOG : ${result_json}"
+        echo "result_json_issues=$(echo ${result_json})" >> $GITHUB_OUTPUT
 
     - name: A11yWatch Scan [External]
       if: ${{ inputs.EXTERNAL == 'true' && inputs.SITE_WIDE == 'false' }}
       shell: bash
-      run: a11ywatch scan --url ${{ inputs.WEBSITE_URL }} --external --save ${{ inputs.FIX == 'true' && '--fix' || '' }}
+      run: |
+        a11ywatch scan --url ${{ inputs.WEBSITE_URL }} --external --save ${{ inputs.FIX == 'true' && '--fix' || '' }}
+        echo "result_json_issues=''" >> $GITHUB_OUTPUT
 
     - name: A11yWatch Crawl [Local]
       if: ${{ inputs.EXTERNAL == 'false' && inputs.SITE_WIDE == 'true' }}
@@ -208,6 +214,11 @@ runs:
         echo "website_issues_total $website_issues_total"
         echo "website_issues_errors $website_issues_errors"
         echo "website_issues_warnings $website_issues_warnings"
+
+        body="$( a11ywatch --github-results-path extract --platform github ${{ inputs.LIST == 'true' && '-l' || ''}} )"
+
+        gh_file="@$(a11ywatch --github-results-path)"
+        echo "gh_file: $gh_file"
 
         total_limit=${{ inputs.FAIL_TOTAL_COUNT }}
         errors_limit=${{ inputs.FAIL_ERRORS_COUNT }}
@@ -239,47 +250,6 @@ runs:
         fi
 
         echo "issues=$(echo ${website_issues_total})" >> $GITHUB_OUTPUT
-
-        echo "result_json_issues=$(echo ${website_issues_total})" >> $GITHUB_OUTPUT
-
-    - name: Post Stats to GitHub PR
-      shell: bash
-      if: ${{ inputs.DISABLE_PR_STATS == 'false' }}
-      run: |
-        # post github
-        GH_TOKEN="${{ inputs.TOKEN || github.token }}"
-
-        results_path="$(a11ywatch --find-results)"
-        gh_api_url="$(a11ywatch --github-api-url)"
-        website_issues=$(a11ywatch --results-issues)
-
-        echo "POST STATS RESULT PR:"
-        echo "website_issues_total $website_issues"
-        echo "OUTPUT ISSUES: ${{ steps.a11ywatch-results-generator.outputs.issues }}"
-
-        # send pr results if issues exist
-        if [ "$website_issues" -gt 0 ]; then
-          # check for open pr
-          pr_response=$(curl --location --request GET "$gh_api_url" \
-              -H "Authorization: token $GH_TOKEN")
-
-          if [ $(echo $pr_response | jq length) -eq 0 ]; then
-            echo "No PR found to update"
-          else
-            pr_comment_url=$(echo $pr_response | jq -r ".[]._links.comments.href")
-
-            # extract the results to a file
-            body="$( a11ywatch --github-results-path extract --platform github ${{ inputs.LIST == 'true' && '-l' || ''}} )"
-
-            # get results of the file path
-            gh_file="@$(a11ywatch --github-results-path)"
-
-            # post comment to github
-            curl -X POST -d "$gh_file" "$pr_comment_url" \
-              -H "Authorization: token $GH_TOKEN" \
-              -H 'Content-Type: application/json'
-          fi
-        fi
 
     - uses: EndBug/add-and-commit@v9
       if: ${{ inputs.FIX == 'true' }}
