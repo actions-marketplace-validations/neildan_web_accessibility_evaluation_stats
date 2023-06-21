@@ -58,22 +58,22 @@ inputs:
     required: false
     default: false
 outputs:
-  amount_issues_total:
+  AMOUNT_ISSUES_TOTAL:
     description: "The amount of errors and warnings found on the page"
     value: ${{ steps.a11ywatch-results-generator.outputs.amount_issues_total }}
-  amount_errors:
+  AMOUNT_ERRORS:
     description: "The amount of errors found on the page"
     value: ${{ steps.a11ywatch-results-generator.outputs.amount_errors }}
-  amount_warnings:
+  AMOUNT_WARNINGS:
     description: "The amount of warnings found on the page"
     value: ${{ steps.a11ywatch-results-generator.outputs.amount_warnings }}
-  evaluation_status:
+  EVALUATION_STATUS:
     description: "The status of end evaluation, show 'Success' or 'Fail'"
     value: ${{ steps.a11ywatch-results-generator.outputs.evaluation_status }}
-  full_evaluation:
+  FULL_EVALUATION:
     description: "A full message with evaluation description"
     value: ${{ steps.a11ywatch-results-generator.outputs.full_evaluation }}
-  json_full_result:
+  JSON_FULL_RESULT:
     description: "The issues descriptions found on the page"
     value: ${{ steps.get-result-json-issues.outputs.json_full_result }}
 runs:
