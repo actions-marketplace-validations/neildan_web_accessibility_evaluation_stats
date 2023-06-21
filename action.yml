@@ -125,9 +125,7 @@ runs:
       if: ${{ inputs.EXTERNAL == 'false' && inputs.SITE_WIDE == 'false' }}
       shell: bash
       run: |
-        result_json="$(a11ywatch scan --url ${{ inputs.WEBSITE_URL }} --save ${{ inputs.FIX == 'true' && '--fix' || '' }})"
-        echo "CONSOLE LOG : ${result_json}"
-        echo "result_json_issues=$(echo ${result_json})" >> $GITHUB_OUTPUT
+        a11ywatch scan --url ${{ inputs.WEBSITE_URL }} --save ${{ inputs.FIX == 'true' && '--fix' || '' }}
 
     - name: A11yWatch Scan [External]
       if: ${{ inputs.EXTERNAL == 'true' && inputs.SITE_WIDE == 'false' }}
